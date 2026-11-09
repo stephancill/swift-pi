@@ -12,6 +12,7 @@ let package = Package(
         .library(name: "PiAI", targets: ["PiAI"]),
         .library(name: "PiAgent", targets: ["PiAgent"]),
         .library(name: "PiTools", targets: ["PiTools"]),
+        .library(name: "PiJavaScript", targets: ["PiJavaScript"]),
     ],
     targets: [
         // Messages, models, the event stream, transcript helpers and provider APIs.
@@ -20,8 +21,11 @@ let package = Package(
         .target(name: "PiAgent", dependencies: ["PiAI"]),
         // Tools that work on files in a workspace directory.
         .target(name: "PiTools", dependencies: ["PiAI", "PiAgent"]),
+        // The javascript tool, which runs code in WebKit.
+        .target(name: "PiJavaScript", dependencies: ["PiAI", "PiAgent", "PiTools"]),
         .testTarget(name: "PiAITests", dependencies: ["PiAI"]),
         .testTarget(name: "PiAgentTests", dependencies: ["PiAI", "PiAgent"]),
         .testTarget(name: "PiToolsTests", dependencies: ["PiAI", "PiAgent", "PiTools"]),
+        .testTarget(name: "PiJavaScriptTests", dependencies: ["PiAI", "PiAgent", "PiTools", "PiJavaScript"]),
     ]
 )

@@ -6,9 +6,10 @@ A Swift port of the core of [pi](https://github.com/earendil-works/pi), the codi
 | --- | --- | --- |
 | `PiAI` | Messages, models, the streaming event protocol, transcript helpers, tool argument validation, and the OpenAI-compatible Chat Completions provider | `pi-ai` |
 | `PiAgent` | The agent loop and the stateful `Agent`: tool execution, hooks, steering and follow-up queues | `pi-agent-core` |
-| `PiTools` | `read`, `write`, `edit`, `ls`, `find` and `grep`, confined to a workspace directory | `pi-coding-agent` tools |
+| `PiTools` | `read`, `write`, `edit`, `ls`, `find` and `grep`, confined to a workspace directory; `web_search` and `web_fetch` | `pi-coding-agent` tools |
+| `PiJavaScript` | `javascript`: runs code in WebKit, with read-only access to the workspace | (new) |
 
-There is no shell tool: iOS apps can't start other programs.
+There is no shell tool: iOS apps can't start other programs. `javascript` covers calculations and data processing.
 
 ## Requirements
 
@@ -27,6 +28,7 @@ Then depend on `PiAI`, `PiAgent` and `PiTools` as needed.
 ```swift
 import PiAgent
 import PiAI
+import PiJavaScript
 import PiTools
 
 // Any OpenAI-compatible server: OpenAI, OpenRouter, Groq, DeepSeek, Ollama, LM Studio, vLLM, llama.cpp, ...
@@ -36,7 +38,7 @@ let workspace = Workspace(root: documentsDirectory)
 let agent = Agent(
     model: model,
     systemPrompt: "You are a helpful assistant with access to files in the user's workspace.",
-    tools: fileTools(workspace: workspace),
+    tools: fileTools(workspace: workspace) + webTools() + [javaScriptTool(workspace: workspace)],
     streamOptions: StreamOptions(apiKey: apiKey)
 )
 
@@ -61,6 +63,12 @@ try await agent.prompt("Summarize notes.md")
 - **Permissions:** set `agent.beforeToolCall` to block a call (e.g. after asking the user). `afterToolCall` rewrites results.
 - **Your own tools:** an `AgentTool` is a name, a description, a JSON Schema and an async `execute` closure. Arguments are validated and coerced against the schema before `execute` runs.
 - **Saving a conversation:** `agent.state.messages` is `Codable`, in the same JSON shape as pi's transcripts.
+
+### Web and JavaScript tools
+
+- `web_search` asks a hosted search that needs no API key, the ones opencode uses: Exa (`https://mcp.exa.ai/mcp`, the default) or Parallel (`https://search.parallel.ai/mcp`), through their MCP servers (`webTools(searchProvider:)`).
+- `web_fetch` returns a URL as Markdown (default), text or HTML, up to 5MB fetched and the usual 50KB to the model. HTTP is upgraded to HTTPS.
+- `javascript` runs code as the body of an async function in a fresh offscreen `WKWebView`: `return` a value, `console.log`, and `await workspace.read(path)` / `workspace.list(path)`. It can't change files. A run stops at its timeout (default 10s, at most 60) or when the agent is aborted, which ends its web content process.
 
 ### Models
 

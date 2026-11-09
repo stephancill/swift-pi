@@ -59,3 +59,16 @@ func truncateHead(_ content: String, maxLines: Int = ToolLimits.maxLines, maxByt
 func looksBinary(_ data: Data) -> Bool {
     data.prefix(8192).contains(0)
 }
+
+/// Text for the model within the limits: whole lines while they fit, else (one huge line, such as minified HTML or
+/// JSON) the first `maxBytes` bytes. Returns whether anything was cut.
+public func truncateForModel(_ text: String, maxBytes: Int = ToolLimits.maxBytes) -> (text: String, truncated: Bool) {
+    let truncation = truncateHead(text, maxBytes: maxBytes)
+    guard truncation.firstLineExceedsLimit else { return (truncation.content, truncation.truncated) }
+    var prefix = Data(text.utf8.prefix(maxBytes))
+    // Back off to a character boundary.
+    while !prefix.isEmpty, String(data: prefix, encoding: .utf8) == nil {
+        prefix.removeLast()
+    }
+    return (String(decoding: prefix, as: UTF8.self), true)
+}

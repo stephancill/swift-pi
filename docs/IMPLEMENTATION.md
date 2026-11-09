@@ -22,6 +22,10 @@ A Swift port of pi's `pi-ai`, `pi-agent-core` and the file tools of `pi-coding-a
   - `Workspace.swift`: path confinement and the per-file mutation queue.
   - `Truncation.swift`: pi's 2000-line / 50KB limits.
   - `FileTools.swift`: `read`, `write`, `edit`, `ls`, `find`, `grep`.
+  - `WebTools.swift`: `web_search` (Exa or Parallel over MCP) and `web_fetch`.
+  - `HTMLText.swift`: HTML to Markdown or text for `web_fetch`.
+- `Sources/PiJavaScript`
+  - `JavaScriptTool.swift`: `javascript` and `JavaScriptRunner`.
 
 ## Differences from pi
 
@@ -53,6 +57,24 @@ A Swift port of pi's `pi-ai`, `pi-agent-core` and the file tools of `pi-coding-a
   - **find/grep:** walk the directory in Swift instead of running `fd`/`ripgrep`. They skip `.git`, `node_modules`, `.build` and `DerivedData` but don't read `.gitignore`. A `find` pattern without `/` matches file names at any depth (fd's behavior).
   - **Not ported:** bash, PowerShell, codemode, MCP.
 - **Not ported:** compaction, sessions, extensions, skills, OAuth, model catalogs, cost catalogs. Apps add these on top through the hooks.
+
+## Web and JavaScript tools (not in pi)
+
+pi's coding agent has no web or script tools of its own (it has bash). These follow opencode's `websearch` and `webfetch`.
+
+- **`web_search`:** calls a hosted MCP server's search tool with one JSON-RPC `tools/call` request. The server is Exa's `web_search_exa` (`https://mcp.exa.ai/mcp`) or Parallel's `web_search` (`https://search.parallel.ai/mcp`); both need no key (observed 2026-11-09). The reply is JSON or SSE; the first text content is returned, truncated like other tool output. The app picks the provider, and there is no fallback between them.
+- **`web_fetch`:**
+  - takes http(s) URLs only, upgrading http to https
+  - limits: 5MB fetched, a 120s timeout
+  - HTML becomes Markdown (default) or text through `HTMLText`, a lenient converter: no DOM, no dependency
+  - drops scripts, styles, navigation, forms and images, and makes relative links absolute
+  - other text passes through, and media types are described rather than returned
+  - output that is one huge line, such as minified pages or JSON, is cut at the byte limit (`truncateForModel`); pi's line truncation would return nothing
+- **`javascript`:**
+  - JavaScriptCore has no public execution time limit (`JSContextGroupSetExecutionTimeLimit` is SPI), so a runaway script could never be stopped. Code runs instead in an offscreen `WKWebView` per run, in WebKit's web content process, with a JIT.
+  - The code becomes an `AsyncFunction` body called through `callAsyncJavaScript`, with `console` captured and a `workspace` object whose `read` and `list` answer through a `WKScriptMessageHandlerWithReply`, confined by `Workspace`.
+  - The timeout and task cancellation tear the view down, which ends the run.
+  - It can't write files, so file changes keep going through `write` and `edit` and any approval hook.
 
 ## Testing
 
