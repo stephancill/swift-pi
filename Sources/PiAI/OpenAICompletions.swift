@@ -246,7 +246,9 @@ public enum OpenAICompletions {
 
     private static func describe(_ error: Error) -> String {
         if let error = error as? ProviderError { return error.message }
-        return (error as? LocalizedError)?.errorDescription ?? String(describing: error)
+        // `localizedDescription` gives Foundation errors' message ("Could not connect to the server."), where
+        // `String(describing:)` gives their whole debug description.
+        return error.localizedDescription
     }
 
     struct ProviderError: Error {

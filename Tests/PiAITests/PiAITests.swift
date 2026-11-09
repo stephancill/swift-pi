@@ -293,6 +293,15 @@ func sse(_ chunks: [JSONValue]) -> String {
         #expect(message.toolCalls.first?.argumentsError?.contains("not json") == true)
     }
 
+    @Test func describesNetworkErrorsReadably() async {
+        // Nothing listens on port 9 of localhost.
+        let model = Model(id: "m", provider: "test", baseURL: "http://127.0.0.1:9/v1")
+        let message = await OpenAICompletions.stream(model: model, context: TranscriptContext(normalizing: Context(messages: [.user(UserMessage(text: "hi"))]))).result()
+        #expect(message.stopReason == .error)
+        #expect(message.errorMessage?.contains("NSURLErrorDomain") == false)
+        #expect(message.errorMessage?.isEmpty == false)
+    }
+
     @Test func unsupportedAPIFailsInStream() async {
         let model = Model(id: "m", api: "nope", provider: "test", baseURL: "https://x")
         let message = await streamSimple(model: model, context: TranscriptContext(transcript: [])).result()
