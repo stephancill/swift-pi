@@ -1,4 +1,4 @@
-# stupid pi
+# swift pi
 
 A Swift port of pi (github.com/earendil-works/pi) for apps that run an agent on the device. Consumers: stupid agent (`../stupid-agent`), which vendors tagged releases.
 
@@ -22,7 +22,7 @@ A Swift port of pi (github.com/earendil-works/pi) for apps that run an agent on 
   - provider tests use `MockURLProtocol`
   - loop tests use `FauxProvider`
   - tool tests use temporary workspaces
-- Check the iOS build: `xcodebuild -scheme StupidPi-Package -destination 'generic/platform=iOS Simulator' build | xcpretty`.
+- Check the iOS build: `xcodebuild -scheme SwiftPi-Package -destination 'generic/platform=iOS Simulator' build | xcpretty`.
 
 ## Before committing
 

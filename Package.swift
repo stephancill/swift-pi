@@ -3,7 +3,7 @@
 import PackageDescription
 
 let package = Package(
-    name: "StupidPi",
+    name: "SwiftPi",
     platforms: [
         .iOS(.v18),
         .macOS(.v15),

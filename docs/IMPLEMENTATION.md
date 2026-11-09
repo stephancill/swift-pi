@@ -62,4 +62,4 @@ A Swift port of pi's `pi-ai`, `pi-agent-core` and the file tools of `pi-coding-a
 - **Loop:** tested with a scripted `FauxProvider`.
 - **Tools:** tested in temporary directories.
 
-To check the iOS build: `xcodebuild -scheme StupidPi-Package -destination 'generic/platform=iOS Simulator' build | xcpretty`.
+To check the iOS build: `xcodebuild -scheme SwiftPi-Package -destination 'generic/platform=iOS Simulator' build | xcpretty`.

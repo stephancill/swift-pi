@@ -1,4 +1,4 @@
-# stupid pi
+# swift pi
 
 A Swift port of the core of [pi](https://github.com/earendil-works/pi), the coding agent by Earendil Works, for iOS and macOS apps that run an agent on the device. It has no dependencies.
 
@@ -17,7 +17,7 @@ iOS 18 or macOS 15, Swift 6.
 ## Install
 
 ```swift
-.package(url: "https://github.com/stephancill/stupid-pi.git", from: "0.1.0")
+.package(url: "https://github.com/stephancill/swift-pi.git", from: "0.1.1")
 ```
 
 Then depend on `PiAI`, `PiAgent` and `PiTools` as needed.
